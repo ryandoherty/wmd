@@ -629,7 +629,6 @@ Attacklab.wmdBase = function(){
 		var stackPtr = 0; // The index of the current state
 		var mode = "none";
 		var lastState; // The last state
-		var poller;
 		var timer; // The setTimeout handle for cancelling the timer
 		var inputStateObj;
 		
@@ -654,7 +653,6 @@ Attacklab.wmdBase = function(){
 		// Force a stack addition and the poller to process.
 		var refreshState = function(){
 			inputStateObj = new wmd.textareaState(elem);
-			poller.tick();
 			timer = undefined;
 		};
 		
@@ -843,7 +841,6 @@ Attacklab.wmdBase = function(){
 				}
 			};
 			
-			poller = new wmd.inputPoller(elem, handlePaste, 100);
 			
 			util.addEvent(elem, "keydown", handleCtrlYZ);
 			util.addEvent(elem, "keydown", handleModeChange);
@@ -862,9 +859,6 @@ Attacklab.wmdBase = function(){
 		};
 		
 		this.destroy = function(){
-			if (poller) {
-				poller.destroy();
-			}
 		};
 		
 		init();
@@ -1299,7 +1293,6 @@ Attacklab.wmdBase = function(){
 			}
 			
 			util.addEvent(self, "resize", setDimensions);
-			resizePollHandle = self.setInterval(setDimensions, 100);
 			if (inputBox.form) {
 				var submitCallback = inputBox.form.onsubmit;
 				inputBox.form.onsubmit = function(){
@@ -1985,6 +1978,8 @@ Attacklab.wmdBase = function(){
 	// DONE - fixed up and jslint clean
 	util.startEditor = function(){
 	
+	    var ignored = null;
+	
 		if (wmd.wmd_env.autostart === false) {
 			util.makeAPI();
 			return;
@@ -2017,6 +2012,7 @@ Attacklab.wmdBase = function(){
 						}
 						
 						edit = new wmd.editor(wmdStuff.input, previewRefreshCallback);
+						clearInterval(ignored);
 					}
 					else 
 						if (preview) {
@@ -2031,7 +2027,7 @@ Attacklab.wmdBase = function(){
 		};
 		
 		util.addEvent(self, "load", loadListener);
-		var ignored = self.setInterval(loadListener, 100);
+		ignored = self.setInterval(loadListener, 100);
 	};
 	
 	// DONE
@@ -2042,7 +2038,6 @@ Attacklab.wmdBase = function(){
 		
 		var managerObj = this;
 		var converter;
-		var poller;
 		var timeout;
 		var elapsedTime;
 		var oldInputText;
@@ -2058,7 +2053,6 @@ Attacklab.wmdBase = function(){
 			
 			util.addEvent(inputElem, "keypress", listener);
 			util.addEvent(inputElem, "keydown", listener);
-			poller = new wmd.inputPoller(inputElem, listener);
 		};
 		
 		var getDocScrollTop = function(){
@@ -2243,9 +2237,6 @@ Attacklab.wmdBase = function(){
 		};
 		
 		this.destroy = function(){
-			if (poller) {
-				poller.destroy();
-			}
 		};
 		
 		init();
